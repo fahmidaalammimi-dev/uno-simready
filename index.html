@@ -40,6 +40,7 @@
       --card-w: 86px;
       --card-h: 126px;
       --card-radius: 10px;
+      --arena-scale: 1;
       
       --font-display: 'Rajdhani', 'Segoe UI', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -51,6 +52,7 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -63,30 +65,33 @@
       color: var(--text-main);
       font-family: var(--font-display);
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
     /* ==========================================================================
-       Header HUD
+       Header HUD & Responsive Navigation Bar
        ========================================================================== */
     .sim-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 24px;
-      background: rgba(15, 21, 35, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
-      z-index: 100;
-      height: 60px;
+      padding: 8px 18px;
+      background: rgba(15, 21, 35, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      z-index: 1000;
+      min-height: 54px;
+      gap: 10px;
     }
 
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .logo-badge {
@@ -94,8 +99,8 @@
       align-items: center;
       gap: 8px;
       font-weight: 800;
-      font-size: 1.4rem;
-      letter-spacing: 2px;
+      font-size: 1.25rem;
+      letter-spacing: 1.5px;
       color: #fff;
       text-transform: uppercase;
     }
@@ -120,9 +125,9 @@
     .hud-stats {
       display: flex;
       align-items: center;
-      gap: 20px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
       letter-spacing: 1px;
     }
 
@@ -130,9 +135,9 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 5px 14px;
-      background: rgba(22, 32, 53, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 12px;
+      background: rgba(22, 32, 53, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
     }
 
@@ -147,30 +152,32 @@
     .controls-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .btn-hud {
-      background: rgba(22, 32, 53, 0.9);
+      background: rgba(22, 32, 53, 0.95);
       color: var(--text-main);
-      border: 1px solid rgba(0, 240, 255, 0.25);
+      border: 1px solid rgba(0, 240, 255, 0.3);
       border-radius: 6px;
-      padding: 7px 14px;
+      padding: 6px 12px;
       font-family: var(--font-display);
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       letter-spacing: 1px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      white-space: nowrap;
     }
 
     .btn-hud:hover {
-      background: rgba(0, 240, 255, 0.15);
+      background: rgba(0, 240, 255, 0.2);
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
       transform: translateY(-1px);
     }
 
@@ -178,8 +185,24 @@
       transform: translateY(1px);
     }
 
+    @media (max-width: 768px) {
+      .hud-stats {
+        display: none;
+      }
+      .logo-badge {
+        font-size: 1rem;
+      }
+      .btn-hud {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+      }
+      .btn-label-long {
+        display: none;
+      }
+    }
+
     /* ==========================================================================
-       3D Game Viewport & Arena
+       3D Game Viewport & Arena Scaling
        ========================================================================== */
     .viewport-container {
       flex: 1;
@@ -188,20 +211,24 @@
       justify-content: center;
       align-items: center;
       perspective: 1200px;
-      perspective-origin: 50% 65%;
+      perspective-origin: 50% 60%;
       overflow: hidden;
+      width: 100%;
+      height: 100%;
     }
 
     .game-arena {
       width: 1000px;
       height: 680px;
-      position: relative;
+      position: absolute;
+      transform-origin: center center;
       transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: scale(var(--arena-scale, 1));
     }
 
     .game-arena.perspective-3d {
-      transform: rotateX(24deg) scale(0.96);
+      transform: scale(var(--arena-scale, 1)) rotateX(22deg);
     }
 
     .game-arena.camera-shake {
@@ -209,13 +236,13 @@
     }
 
     @keyframes cameraShake {
-      10%, 90% { transform: rotateX(24deg) scale(0.96) translate3d(-2px, -3px, 0); }
-      20%, 80% { transform: rotateX(24deg) scale(0.96) translate3d(4px, 2px, 0); }
-      30%, 50%, 70% { transform: rotateX(24deg) scale(0.96) translate3d(-5px, -2px, 0); }
-      40%, 60% { transform: rotateX(24deg) scale(0.96) translate3d(5px, 3px, 0); }
+      10%, 90% { transform: scale(var(--arena-scale, 1)) rotateX(22deg) translate3d(-3px, -3px, 0); }
+      20%, 80% { transform: scale(var(--arena-scale, 1)) rotateX(22deg) translate3d(4px, 2px, 0); }
+      30%, 50%, 70% { transform: scale(var(--arena-scale, 1)) rotateX(22deg) translate3d(-5px, -2px, 0); }
+      40%, 60% { transform: scale(var(--arena-scale, 1)) rotateX(22deg) translate3d(5px, 3px, 0); }
     }
 
-    /* Futuristic Arena Table */
+    /* Tactical Table */
     .tactical-table {
       position: absolute;
       inset: 40px;
@@ -299,7 +326,6 @@
       z-index: 10;
     }
 
-    /* Deck Pile */
     .deck-pile {
       width: var(--card-w);
       height: var(--card-h);
@@ -354,7 +380,6 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Discard Pile */
     .discard-pile {
       width: var(--card-w);
       height: var(--card-h);
@@ -388,7 +413,6 @@
       box-shadow: 0 0 25px var(--color-yellow-glow);
     }
 
-    /* Action Banner (Skip, Reverse, +2, +4 notification) */
     .action-announcer {
       position: absolute;
       top: 36%;
@@ -448,28 +472,15 @@
       z-index: 60 !important;
     }
 
-    @media (max-width: 1100px) {
-      .game-arena {
-        transform: scale(0.85);
-      }
-      .game-arena.perspective-3d {
-        transform: rotateX(24deg) scale(0.85);
-      }
+    .sim-card.selected-card {
+      animation: none !important;
+      transform: translateY(calc(var(--base-y, 0px) - 34px)) rotate(var(--base-rot, 0deg)) scale(1.22) !important;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 1), 0 16px 30px rgba(0,0,0,0.8) !important;
+      z-index: 100 !important;
     }
 
-    @media (max-width: 860px) {
-      .game-arena {
-        transform: scale(0.7);
-      }
-      .game-arena.perspective-3d {
-        transform: rotateX(20deg) scale(0.7);
-      }
-      .sim-header {
-        padding: 8px 12px;
-      }
-      .hud-stats {
-        display: none;
-      }
+    .sim-card.selected-card .card-face {
+      border: 3px solid #fff !important;
     }
 
     .sim-card.disabled {
@@ -477,7 +488,6 @@
       filter: brightness(0.65) saturate(0.8);
     }
 
-    /* Card Skin Face */
     .card-face {
       position: absolute;
       inset: 0;
@@ -502,7 +512,6 @@
       pointer-events: none;
     }
 
-    /* Color Palettes */
     .card-face.red {
       background: linear-gradient(135deg, #e60039, #b30029);
       border-color: rgba(255, 128, 160, 0.4);
@@ -524,7 +533,6 @@
       border: 2px solid #a855f7;
     }
 
-    /* Card Back (Flipped) */
     .card-back {
       position: absolute;
       inset: 0;
@@ -549,7 +557,6 @@
       border-radius: 6px;
     }
 
-    /* Card Inner Geometry */
     .card-corner {
       font-size: 0.95rem;
       font-weight: 900;
@@ -580,7 +587,6 @@
       text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
     }
 
-    /* Special Iconography */
     .wild-quad-ring {
       width: 44px;
       height: 44px;
@@ -596,7 +602,7 @@
     }
 
     /* ==========================================================================
-       Player Stations (Spatial Layout)
+       Player Stations
        ========================================================================== */
     .player-station {
       position: absolute;
@@ -608,7 +614,6 @@
       z-index: 20;
     }
 
-    /* Station Status Pod */
     .station-pod {
       display: flex;
       align-items: center;
@@ -679,7 +684,6 @@
       to { transform: translateY(-5px); }
     }
 
-    /* Human Station (Bottom) */
     .station-human {
       bottom: 12px;
       left: 50%;
@@ -699,7 +703,6 @@
       align-items: flex-end;
     }
 
-    /* AI North (Top) */
     .station-north {
       top: 15px;
       left: 50%;
@@ -718,7 +721,6 @@
       border: 1px solid rgba(0, 240, 255, 0.3);
     }
 
-    /* AI West (Left) */
     .station-west {
       left: 10px;
       top: 50%;
@@ -738,7 +740,6 @@
       border: 1px solid rgba(0, 240, 255, 0.3);
     }
 
-    /* AI East (Right) */
     .station-east {
       right: 10px;
       top: 50%;
@@ -759,27 +760,75 @@
     }
 
     /* ==========================================================================
-       Action Pod: Pass Turn & UNO Call Buttons
+       Player Action Pod (Play, Draw, UNO, Pass)
        ========================================================================== */
     .player-action-pod {
       position: absolute;
-      right: 30px;
-      bottom: 24px;
+      right: 20px;
+      bottom: 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      z-index: 90;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .btn-action {
+      background: rgba(22, 32, 53, 0.95);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--text-main);
+      padding: 9px 18px;
+      border-radius: 20px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      white-space: nowrap;
+    }
+
+    .btn-action:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-play {
+      background: linear-gradient(135deg, #00f0ff, #0088ff);
+      color: #030812;
+      font-weight: 900;
+      border: none;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      display: none;
+    }
+
+    .btn-play.visible {
+      display: block;
+      animation: playPulse 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes playPulse {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
+      100% { transform: scale(1.08); box-shadow: 0 0 30px rgba(0, 240, 255, 0.9); }
+    }
+
+    .btn-draw {
+      background: rgba(18, 28, 46, 0.9);
+      border-color: rgba(0, 240, 255, 0.4);
+      color: var(--accent-cyan);
     }
 
     .btn-uno {
-      width: 80px;
-      height: 80px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #ff4d6d, #b30029);
       border: 3px solid #fff;
       color: #fff;
       font-weight: 900;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       letter-spacing: 1px;
       cursor: pointer;
       box-shadow: 0 0 25px rgba(255, 42, 95, 0.6);
@@ -804,40 +853,28 @@
     }
 
     .btn-pass {
-      background: rgba(22, 32, 53, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--text-main);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      letter-spacing: 1px;
-      cursor: pointer;
       display: none;
-      backdrop-filter: blur(8px);
+      background: rgba(30, 40, 60, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .btn-pass.visible {
       display: block;
     }
 
-    .btn-pass:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: #fff;
-    }
-
     /* ==========================================================================
-       Modals: Color Picker & Game Over
+       Modals
        ========================================================================== */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(5, 8, 14, 0.85);
+      background: rgba(5, 8, 14, 0.88);
       backdrop-filter: blur(12px);
-      z-index: 200;
+      z-index: 2000;
       display: none;
       justify-content: center;
       align-items: center;
+      padding: 20px;
     }
 
     .modal-overlay.active {
@@ -845,13 +882,14 @@
     }
 
     .picker-box {
-      background: rgba(16, 23, 37, 0.95);
+      background: rgba(16, 23, 37, 0.96);
       border: 2px solid var(--accent-cyan);
-      box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.35);
       border-radius: 24px;
       padding: 30px;
       text-align: center;
       max-width: 420px;
+      width: 100%;
       animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -876,7 +914,7 @@
     }
 
     .color-tile {
-      height: 90px;
+      height: 85px;
       border-radius: 14px;
       cursor: pointer;
       font-weight: 800;
@@ -900,15 +938,72 @@
       box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
     }
 
+    /* Start Game Modal */
+    .start-box {
+      max-width: 480px;
+      padding: 36px 28px;
+    }
+
+    .start-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .start-subtitle {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+    }
+
+    .rules-quick-guide {
+      background: rgba(10, 16, 28, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.88rem;
+      color: #d0dff8;
+      text-align: left;
+    }
+
+    .btn-start-game {
+      background: linear-gradient(135deg, #00e676, #00b4ff);
+      color: #05080e;
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: 2px;
+      padding: 14px 40px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.5);
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 100%;
+    }
+
+    .btn-start-game:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 45px rgba(0, 230, 118, 0.8);
+    }
+
     /* Game Over Modal */
     .gameover-box {
-      background: rgba(16, 23, 37, 0.95);
+      background: rgba(16, 23, 37, 0.96);
       border: 2px solid var(--gold);
-      box-shadow: 0 0 60px rgba(255, 209, 102, 0.3);
+      box-shadow: 0 0 60px rgba(255, 209, 102, 0.35);
       border-radius: 24px;
       padding: 36px;
       text-align: center;
       max-width: 460px;
+      width: 100%;
       animation: modalPop 0.3s ease;
     }
 
@@ -950,16 +1045,14 @@
       box-shadow: 0 0 35px rgba(0, 240, 255, 0.8);
     }
 
-    /* ==========================================================================
-       Ticker Log HUD (Left-Bottom)
-       ========================================================================== */
+    /* Ticker Log */
     .ticker-hud {
       position: absolute;
-      left: 20px;
+      left: 15px;
       bottom: 15px;
-      width: 280px;
-      height: 80px;
-      background: rgba(10, 15, 25, 0.7);
+      width: 250px;
+      height: 75px;
+      background: rgba(10, 15, 25, 0.75);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 8px;
@@ -969,7 +1062,7 @@
       justify-content: flex-end;
       overflow: hidden;
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       pointer-events: none;
       z-index: 50;
@@ -996,9 +1089,7 @@
 </head>
 <body>
 
-  <!-- ==========================================================================
-       Top HUD Header
-       ========================================================================== -->
+  <!-- Top HUD Header & Navigation Bar -->
   <header class="sim-header">
     <div class="brand-group">
       <div class="logo-badge">
@@ -1011,7 +1102,7 @@
           <span id="match-turn-label">ROUND 1</span>
         </div>
         <div class="hud-pill">
-          <span style="color:var(--text-muted)">ACTIVE COLOR:</span>
+          <span style="color:var(--text-muted)">ACTIVE:</span>
           <span id="active-color-name" style="font-weight:800; color:var(--accent-cyan)">INIT</span>
         </div>
       </div>
@@ -1019,26 +1110,23 @@
 
     <div class="controls-group">
       <button class="btn-hud" id="btn-sort" title="Sort Hand by Color or Value">
-        <span>⇄ SORT HAND</span>
+        <span>⇄ SORT<span class="btn-label-long"> HAND</span></span>
       </button>
       <button class="btn-hud" id="btn-camera" title="Toggle 3D Table Perspective">
-        <span>🎥 CAMERA: 3D</span>
+        <span>🎥 <span class="btn-label-long">CAMERA: </span><span id="camera-label">3D</span></span>
       </button>
       <button class="btn-hud" id="btn-sound" title="Toggle Sound FX">
-        <span id="sound-icon">🔊 SOUND ON</span>
+        <span id="sound-icon">🔊<span class="btn-label-long"> SOUND ON</span></span>
       </button>
       <button class="btn-hud" id="btn-new-game" title="Reset Match">
-        <span>↺ NEW MATCH</span>
+        <span>↺ <span class="btn-label-long">NEW </span>MATCH</span>
       </button>
     </div>
   </header>
 
-  <!-- ==========================================================================
-       Interactive 3D Arena Viewport
-       ========================================================================== -->
+  <!-- Interactive 3D Arena Viewport -->
   <main class="viewport-container">
     <div class="game-arena perspective-3d" id="game-arena">
-      <!-- Outer Tactical Table -->
       <div class="tactical-table">
         <!-- Direction Orbit Visualizer -->
         <div class="turn-orbit-ring cw" id="orbit-ring">
@@ -1050,7 +1138,6 @@
 
         <!-- Center Podium: Deck and Discard Pile -->
         <div class="center-podium">
-          <!-- Draw Deck -->
           <div class="deck-pile" id="draw-deck" title="Click to Draw a Card">
             <div class="card-mock"></div>
             <div class="card-mock"></div>
@@ -1062,17 +1149,14 @@
             <div class="deck-count-badge" id="deck-count-label">DECK: 108</div>
           </div>
 
-          <!-- Discard Pile -->
           <div class="discard-pile" id="discard-pile">
             <div class="active-color-ring color-red" id="active-color-ring"></div>
-            <!-- Top Discard Card will be dynamically injected here -->
           </div>
         </div>
 
-        <!-- Event Action Announcer Banner -->
         <div class="action-announcer" id="action-announcer">REVERSE</div>
 
-        <!-- Opponent Station 2: AI North -->
+        <!-- AI North -->
         <div class="player-station station-north" id="station-2">
           <div class="uno-speech-bubble" id="uno-bubble-2">UNO!</div>
           <div class="station-pod">
@@ -1083,7 +1167,7 @@
           <div class="north-hand-mock" id="north-hand-mock"></div>
         </div>
 
-        <!-- Opponent Station 1: AI West -->
+        <!-- AI West -->
         <div class="player-station station-west" id="station-1">
           <div class="uno-speech-bubble" id="uno-bubble-1">UNO!</div>
           <div class="station-pod">
@@ -1094,7 +1178,7 @@
           <div class="west-hand-mock" id="west-hand-mock"></div>
         </div>
 
-        <!-- Opponent Station 3: AI East -->
+        <!-- AI East -->
         <div class="player-station station-east" id="station-3">
           <div class="uno-speech-bubble" id="uno-bubble-3">UNO!</div>
           <div class="station-pod">
@@ -1105,7 +1189,7 @@
           <div class="east-hand-mock" id="east-hand-mock"></div>
         </div>
 
-        <!-- Human Station: Player 0 (Bottom) -->
+        <!-- Human Operator Station -->
         <div class="player-station station-human active-turn" id="station-0">
           <div class="uno-speech-bubble" id="uno-bubble-0">UNO!</div>
           <div class="station-pod">
@@ -1113,28 +1197,43 @@
             <div class="station-name">OPERATOR</div>
             <div class="station-card-badge" id="card-badge-0">7 CARDS</div>
           </div>
-          <div class="human-hand-container" id="human-hand">
-            <!-- Dynamic Human Cards Rendered Here -->
-          </div>
+          <div class="human-hand-container" id="human-hand"></div>
         </div>
       </div>
     </div>
 
-    <!-- Human Action Pod: UNO shout & Pass Turn -->
+    <!-- Player Action Pod -->
     <div class="player-action-pod">
+      <button class="btn-action btn-play" id="btn-play-card">▶ PLAY CARD</button>
+      <button class="btn-action btn-draw" id="btn-draw-card">🎴 DRAW CARD</button>
       <button class="btn-uno" id="btn-uno" title="Call UNO before playing your 2nd to last card!">UNO!</button>
-      <button class="btn-pass" id="btn-pass">PASS TURN</button>
+      <button class="btn-action btn-pass" id="btn-pass">PASS TURN</button>
     </div>
 
-    <!-- HUD Combat-Style Event Ticker -->
+    <!-- HUD Ticker -->
     <div class="ticker-hud" id="ticker-hud">
       <div class="log-entry highlight">System Initialized. SimReady table ready.</div>
     </div>
   </main>
 
-  <!-- ==========================================================================
-       Modal: Wild Color Picker
-       ========================================================================== -->
+  <!-- Modal: Start Game / Play Now -->
+  <div class="modal-overlay active" id="modal-start">
+    <div class="picker-box start-box">
+      <div class="start-logo">
+        <span class="nvidia-badge">SIMREADY</span>
+        <span class="uno-title" style="font-size:2.2rem">UNO PROTOCOL</span>
+      </div>
+      <p class="start-subtitle">Tactical Multiplayer Card Simulation vs 3 AI Agents</p>
+      <div class="rules-quick-guide">
+        <div>🎨 <b>Match:</b> Match the top card's color or number.</div>
+        <div>⚡ <b>Special Cards:</b> Skip, Reverse, +2, Wild, and +4.</div>
+        <div>🚨 <b>Call UNO:</b> Press the UNO! button when you have 1 card left!</div>
+      </div>
+      <button class="btn-start-game" id="btn-start-game">▶ PLAY GAME</button>
+    </div>
+  </div>
+
+  <!-- Modal: Color Picker -->
   <div class="modal-overlay" id="modal-color-picker">
     <div class="picker-box">
       <div class="picker-title">Select Color Directive</div>
@@ -1147,9 +1246,7 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-       Modal: Game Over / Victory
-       ========================================================================== -->
+  <!-- Modal: Game Over / Victory -->
   <div class="modal-overlay" id="modal-gameover">
     <div class="gameover-box">
       <div class="winner-trophy" id="gameover-trophy">🏆</div>
@@ -1159,14 +1256,10 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-       Card Game Architecture, Systems & Audio Synthesis
-       ========================================================================== -->
   <script>
     /**
      * ==========================================================================
      * 1. AUDIO SYNTHESIS SYSTEM (Web Audio API)
-     * Production-ready procedural sound effects. Zero external asset dependencies.
      * ==========================================================================
      */
     class AudioEngine {
@@ -1208,8 +1301,6 @@
 
         osc.start(t);
         osc.stop(t + 0.09);
-
-        // Click transient noise
         this.playNoise(0.02, 0.15, 800);
       }
 
@@ -1287,7 +1378,7 @@
         this.init();
         if (!this.ctx) return;
 
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const notes = [523.25, 659.25, 783.99, 1046.50];
         const t = this.ctx.currentTime;
 
         notes.forEach((freq, idx) => {
@@ -1311,7 +1402,7 @@
         this.init();
         if (!this.ctx) return;
 
-        const notes = [392.00, 311.13, 261.63]; // G4, Eb4, C4
+        const notes = [392.00, 311.13, 261.63];
         const t = this.ctx.currentTime;
 
         notes.forEach((freq, idx) => {
@@ -1361,7 +1452,6 @@
     /**
      * ==========================================================================
      * 2. GAME MODEL & CORE CARD MECHANICS (Card-Game Skill)
-     * Standard 108 Card Deck, Action Cards, Validation & Turn Scheduling
      * ==========================================================================
      */
     const COLORS = ['red', 'blue', 'green', 'yellow'];
@@ -1386,13 +1476,14 @@
           { id: 3, name: 'Vortex-03', isAI: true, hand: [], unoDeclared: false }
         ];
         this.currentPlayerIdx = 0;
-        this.direction = 1; // 1: clockwise, -1: counter-clockwise
+        this.direction = 1;
         this.activeColor = 'red';
         this.hasDrawnThisTurn = false;
         this.isWaitingForColor = false;
         this.pendingWildCard = null;
+        this.selectedCardIdx = null;
         this.isProcessingAI = false;
-        this.sortBy = 'color'; // 'color' or 'value'
+        this.sortBy = 'color';
         this.is3D = true;
       }
 
@@ -1405,9 +1496,9 @@
         this.hasDrawnThisTurn = false;
         this.isWaitingForColor = false;
         this.pendingWildCard = null;
+        this.selectedCardIdx = null;
         this.isProcessingAI = false;
 
-        // Deal 7 cards to each player
         this.players.forEach(p => {
           p.hand = [];
           p.unoDeclared = false;
@@ -1416,7 +1507,7 @@
           }
         });
 
-        // Seed discard pile with a standard number card
+        // Seed discard pile with a clean number card
         let initialCard = this.deck.pop();
         while (initialCard.type !== CARD_TYPES.NUMBER) {
           this.deck.unshift(initialCard);
@@ -1429,7 +1520,6 @@
         this.log(`New Match Started. First card: ${initialCard.color.toUpperCase()} ${initialCard.value}`);
         this.updateUI();
 
-        // Check if starting player is AI
         if (this.players[this.currentPlayerIdx].isAI) {
           this.scheduleAITurn();
         }
@@ -1440,16 +1530,13 @@
         let cardId = 1;
 
         COLORS.forEach(color => {
-          // One 0 per color
           deck.push({ id: cardId++, color, type: CARD_TYPES.NUMBER, value: 0 });
 
-          // Two of each 1-9 per color
           for (let val = 1; val <= 9; val++) {
             deck.push({ id: cardId++, color, type: CARD_TYPES.NUMBER, value: val });
             deck.push({ id: cardId++, color, type: CARD_TYPES.NUMBER, value: val });
           }
 
-          // Two of each action per color
           [CARD_TYPES.SKIP, CARD_TYPES.REVERSE, CARD_TYPES.DRAW2].forEach(actionType => {
             const valLabel = actionType === CARD_TYPES.DRAW2 ? '+2' : actionType.toUpperCase();
             deck.push({ id: cardId++, color, type: actionType, value: valLabel });
@@ -1457,7 +1544,6 @@
           });
         });
 
-        // 4 Wilds and 4 Wild Draw Fours
         for (let i = 0; i < 4; i++) {
           deck.push({ id: cardId++, color: 'wild', type: CARD_TYPES.WILD, value: 'W' });
           deck.push({ id: cardId++, color: 'wild', type: CARD_TYPES.WILD4, value: '+4' });
@@ -1520,10 +1606,10 @@
 
       advanceTurn(skipSteps = 1) {
         this.hasDrawnThisTurn = false;
+        this.selectedCardIdx = null;
         this.currentPlayerIdx = this.getNextPlayerIndex(skipSteps);
         this.updateUI();
 
-        // Check if current player is AI
         if (this.players[this.currentPlayerIdx].isAI) {
           this.scheduleAITurn();
         }
@@ -1534,25 +1620,22 @@
         if (!card || !this.canPlayCard(card)) return false;
 
         // Verify UNO Call compliance:
-        // If player has 2 cards and plays 1 without calling UNO, penalize with 2 cards!
         if (player.hand.length === 2 && !player.unoDeclared) {
           this.log(`⚠️ ${player.name} forgot to call UNO! Penalty +2 cards applied.`);
           this.drawCardsForPlayer(player, 2);
           this.triggerAnnouncement('UNO PENALTY!');
         }
 
-        // Remove card from player hand
         player.hand.splice(cardIndex, 1);
         this.discardPile.push(card);
+        this.selectedCardIdx = null;
         this.audio.playCardSnap();
 
-        // Check win condition
         if (player.hand.length === 0) {
           this.handleGameOver(player);
           return true;
         }
 
-        // Handle UNO shout trigger if exactly 1 card remains
         if (player.hand.length === 1) {
           this.audio.playUnoAlert();
           this.showUnoBubble(player.id);
@@ -1560,7 +1643,6 @@
           this.log(`🚨 ${player.name} has only ONE card left! UNO!`);
         }
 
-        // Resolve Card Mechanics
         if (card.color === 'wild') {
           this.activeColor = chosenWildColor || 'red';
           this.audio.playSpecialAction();
@@ -1571,7 +1653,7 @@
             this.log(`${player.name} played WILD +4! Chosen Color: ${this.activeColor.toUpperCase()}`);
             this.triggerAnnouncement('+4 DRAW FOUR!');
             this.drawCardsForPlayer(nextP, 4);
-            this.advanceTurn(2); // Skips the victim
+            this.advanceTurn(2);
             return true;
           } else {
             this.log(`${player.name} played WILD! Color chosen: ${this.activeColor.toUpperCase()}`);
@@ -1605,7 +1687,6 @@
             this.advanceTurn(2);
             return true;
           } else {
-            // Standard number card
             this.log(`${player.name} played ${card.color.toUpperCase()} ${card.value}`);
             this.advanceTurn(1);
             return true;
@@ -1635,9 +1716,6 @@
         this.log(`🏁 MATCH ENDED. WINNER: ${winner.name.toUpperCase()}`);
       }
 
-      /**
-       * AI Opponent Decision Engine
-       */
       scheduleAITurn() {
         if (this.isProcessingAI) return;
         this.isProcessingAI = true;
@@ -1651,7 +1729,6 @@
             return;
           }
 
-          // Evaluate playable cards
           const playableIndices = [];
           aiPlayer.hand.forEach((card, idx) => {
             if (this.canPlayCard(card)) {
@@ -1659,7 +1736,6 @@
             }
           });
 
-          // Simulate AI calling UNO when down to 2 cards
           if (aiPlayer.hand.length === 2 && Math.random() < 0.95) {
             aiPlayer.unoDeclared = true;
             this.showUnoBubble(aiPlayer.id);
@@ -1667,8 +1743,6 @@
           }
 
           if (playableIndices.length > 0) {
-            // Strategic AI Card Selection:
-            // Prefer action cards (+4, +2, Skip, Reverse), then number cards
             playableIndices.sort((a, b) => {
               const cardA = aiPlayer.hand[a];
               const cardB = aiPlayer.hand[b];
@@ -1680,7 +1754,6 @@
             const chosenIndex = playableIndices[0];
             const chosenCard = aiPlayer.hand[chosenIndex];
 
-            // AI Color selection for Wilds: choose majority color in hand
             let chosenColor = 'red';
             if (chosenCard.color === 'wild') {
               const colorCounts = { red: 0, blue: 0, green: 0, yellow: 0 };
@@ -1698,13 +1771,11 @@
 
             this.playCard(aiPlayer, chosenIndex, chosenColor);
           } else {
-            // Draw a card
             this.log(`${aiPlayer.name} has no valid play and drew a card.`);
             const drawn = this.drawCardFromDeck();
             if (drawn) {
               aiPlayer.hand.push(drawn);
               this.audio.playCardDraw();
-              // If drawn card is playable, AI immediately plays it
               if (this.canPlayCard(drawn)) {
                 const newIdx = aiPlayer.hand.length - 1;
                 let colorForWild = 'blue';
@@ -1725,38 +1796,31 @@
 
       /**
        * ==========================================================================
-       * 3. UI RENDERING & SPATIAL FEEDBACK (Level & Camera Design Skills)
+       * 3. UI RENDERING & SPATIAL FEEDBACK
        * ==========================================================================
        */
       updateUI() {
-        // Update Discard Top Card
         const topCard = this.getTopCard();
         const discardContainer = document.getElementById('discard-pile');
         const colorRing = document.getElementById('active-color-ring');
 
-        // Color ring update
         colorRing.className = `active-color-ring color-${this.activeColor}`;
         document.getElementById('active-color-name').textContent = this.activeColor.toUpperCase();
         document.getElementById('active-color-name').style.color = `var(--color-${this.activeColor})`;
 
-        // Re-render top discard card
         const existingCard = discardContainer.querySelector('.sim-card');
         if (existingCard) existingCard.remove();
 
         const topCardElem = this.createCardElement(topCard, false);
-        // Add random slight rotational jitter for photorealistic tactile look
         const jitter = (topCard.id * 17) % 18 - 9;
         topCardElem.style.transform = `rotate(${jitter}deg)`;
         discardContainer.appendChild(topCardElem);
 
-        // Update Deck Count
         document.getElementById('deck-count-label').textContent = `DECK: ${this.deck.length}`;
 
-        // Update Direction Orbit Ring
         const ring = document.getElementById('orbit-ring');
         ring.className = `turn-orbit-ring ${this.direction === 1 ? 'cw' : 'ccw'}`;
 
-        // Update Stations active-turn class & card counts
         this.players.forEach(p => {
           const station = document.getElementById(`station-${p.id}`);
           const badge = document.getElementById(`card-badge-${p.id}`);
@@ -1768,18 +1832,26 @@
           }
         });
 
-        // Update AI Hand Mocks (visual card backs)
         this.renderAIMockHand('north-hand-mock', this.players[2].hand.length, false);
         this.renderAIMockHand('west-hand-mock', this.players[1].hand.length, true);
         this.renderAIMockHand('east-hand-mock', this.players[3].hand.length, true);
 
-        // Update Human Hand
         this.renderHumanHand();
+
+        const isHumanTurn = this.currentPlayerIdx === 0;
 
         // Pass button visibility: only if human's turn AND has drawn a card
         const btnPass = document.getElementById('btn-pass');
-        const isHumanTurn = this.currentPlayerIdx === 0;
         btnPass.classList.toggle('visible', isHumanTurn && this.hasDrawnThisTurn);
+
+        // Play card button visibility: when a playable card is selected
+        const btnPlay = document.getElementById('btn-play-card');
+        const hasPlayableSelected = this.selectedCardIdx !== null && this.canPlayCard(this.players[0].hand[this.selectedCardIdx]);
+        btnPlay.classList.toggle('visible', isHumanTurn && hasPlayableSelected);
+
+        // Draw card button enabled when it is player's turn and not yet drawn
+        const btnDraw = document.getElementById('btn-draw-card');
+        btnDraw.style.opacity = isHumanTurn && !this.hasDrawnThisTurn ? '1' : '0.6';
 
         // UNO Button highlight
         const btnUno = document.getElementById('btn-uno');
@@ -1805,7 +1877,6 @@
         const human = this.players[0];
         const isMyTurn = this.currentPlayerIdx === 0;
 
-        // Sorting
         const cardsWithIndices = human.hand.map((card, idx) => ({ card, originalIdx: idx }));
         if (this.sortBy === 'color') {
           const order = { red: 1, blue: 2, green: 3, yellow: 4, wild: 5 };
@@ -1822,6 +1893,7 @@
         cardsWithIndices.forEach((item, i) => {
           const { card, originalIdx } = item;
           const playable = isMyTurn && this.canPlayCard(card);
+          const isSelected = this.selectedCardIdx === originalIdx;
           const cardElem = this.createCardElement(card, true);
 
           if (playable) {
@@ -1830,8 +1902,10 @@
             cardElem.classList.add('disabled');
           }
 
-          // Fan positioning calculations
-          const xPos = total === 1 ? 0 : startLeft + i * step;
+          if (isSelected) {
+            cardElem.classList.add('selected-card');
+          }
+
           const rot = total > 1 ? ((i - (total - 1) / 2) / ((total - 1) / 2 || 1)) * 14 : 0;
           const yOffset = Math.abs(rot) * 1.6;
 
@@ -1841,21 +1915,28 @@
           cardElem.style.transform = `translateY(${yOffset}px) rotate(${rot}deg)`;
           cardElem.style.zIndex = i + 10;
 
-          // Click handler to play
+          // Card Tap/Click Handler
           cardElem.addEventListener('click', () => {
             if (!isMyTurn) {
               this.log('Wait for your turn, Operator.');
               return;
             }
-            if (!playable) {
-              this.log('Invalid card play. Must match color, value, or be Wild.');
-              return;
-            }
 
-            if (card.color === 'wild') {
-              this.openColorPicker(originalIdx);
+            if (isSelected) {
+              // Tapped already selected card -> play it immediately!
+              if (playable) {
+                if (card.color === 'wild') {
+                  this.openColorPicker(originalIdx);
+                } else {
+                  this.playCard(human, originalIdx);
+                }
+              } else {
+                this.log('Invalid card. Must match color, value, or be Wild.');
+              }
             } else {
-              this.playCard(human, originalIdx);
+              // Select this card
+              this.selectedCardIdx = originalIdx;
+              this.updateUI();
             }
           });
 
@@ -1870,19 +1951,16 @@
         const face = document.createElement('div');
         face.className = `card-face ${card.color}`;
 
-        // Value text or symbol
         let displayVal = card.value;
         if (card.type === CARD_TYPES.SKIP) displayVal = '⊘';
         if (card.type === CARD_TYPES.REVERSE) displayVal = '⇄';
         if (card.type === CARD_TYPES.WILD) displayVal = 'W';
         if (card.type === CARD_TYPES.WILD4) displayVal = '+4';
 
-        // Top-left corner
         const cornerTop = document.createElement('div');
         cornerTop.className = 'card-corner';
         cornerTop.textContent = displayVal;
 
-        // Center Art
         const centerArt = document.createElement('div');
         centerArt.className = 'card-center-art';
 
@@ -1908,7 +1986,6 @@
           centerArt.appendChild(centerText);
         }
 
-        // Bottom-right corner
         const cornerBottom = document.createElement('div');
         cornerBottom.className = 'card-corner bottom';
         cornerBottom.textContent = displayVal;
@@ -1979,15 +2056,55 @@
 
     /**
      * ==========================================================================
-     * 4. BOOTSTRAPPER & EVENT WIRING
+     * 4. DYNAMIC VIEWPORT SCALER & BOOTSTRAPPER
      * ==========================================================================
      */
+    function fitArena() {
+      const container = document.querySelector('.viewport-container');
+      const arena = document.getElementById('game-arena');
+      if (!container || !arena) return;
+
+      const availW = container.clientWidth - 20;
+      const availH = container.clientHeight - 20;
+      const scale = Math.min(availW / 1000, availH / 680, 1.15);
+      document.documentElement.style.setProperty('--arena-scale', Math.max(0.38, scale).toFixed(3));
+    }
+
+    window.addEventListener('resize', fitArena);
+    window.addEventListener('orientationchange', () => setTimeout(fitArena, 200));
+
     window.addEventListener('DOMContentLoaded', () => {
       const game = new UnoGame();
       window.gameInstance = game;
 
-      // Draw Deck Click
-      document.getElementById('draw-deck').addEventListener('click', () => {
+      fitArena();
+
+      // Start Game Button
+      document.getElementById('btn-start-game').addEventListener('click', () => {
+        game.audio.init();
+        document.getElementById('modal-start').classList.remove('active');
+        game.initNewMatch();
+        fitArena();
+      });
+
+      // Play Selected Card Button
+      document.getElementById('btn-play-card').addEventListener('click', () => {
+        if (game.currentPlayerIdx !== 0) return;
+        if (game.selectedCardIdx === null) return;
+
+        const human = game.players[0];
+        const card = human.hand[game.selectedCardIdx];
+        if (!card) return;
+
+        if (card.color === 'wild') {
+          game.openColorPicker(game.selectedCardIdx);
+        } else {
+          game.playCard(human, game.selectedCardIdx);
+        }
+      });
+
+      // Draw Card (Action button and Table Deck Pile)
+      const triggerDraw = () => {
         if (game.currentPlayerIdx !== 0) {
           game.log('Hold tactical patience. It is not your turn.');
           return;
@@ -2003,9 +2120,16 @@
           game.hasDrawnThisTurn = true;
           game.audio.playCardDraw();
           game.log(`Operator drew ${drawn.color.toUpperCase()} ${drawn.value}`);
+          // Auto select drawn card if playable
+          if (game.canPlayCard(drawn)) {
+            game.selectedCardIdx = game.players[0].hand.length - 1;
+          }
           game.updateUI();
         }
-      });
+      };
+
+      document.getElementById('draw-deck').addEventListener('click', triggerDraw);
+      document.getElementById('btn-draw-card').addEventListener('click', triggerDraw);
 
       // Pass Button Click
       document.getElementById('btn-pass').addEventListener('click', () => {
@@ -2037,7 +2161,6 @@
       // Sort Hand Button
       document.getElementById('btn-sort').addEventListener('click', () => {
         game.sortBy = game.sortBy === 'color' ? 'value' : 'color';
-        document.getElementById('btn-sort').innerHTML = `<span>⇄ SORT: ${game.sortBy.toUpperCase()}</span>`;
         game.renderHumanHand();
       });
 
@@ -2046,13 +2169,16 @@
         game.is3D = !game.is3D;
         const arena = document.getElementById('game-arena');
         arena.classList.toggle('perspective-3d', game.is3D);
-        document.getElementById('btn-camera').innerHTML = `<span>🎥 CAMERA: ${game.is3D ? '3D' : '2D TOP'}</span>`;
+        document.getElementById('camera-label').textContent = game.is3D ? '3D' : '2D';
       });
 
       // Sound Toggle
       document.getElementById('btn-sound').addEventListener('click', () => {
         game.audio.enabled = !game.audio.enabled;
-        document.getElementById('sound-icon').textContent = game.audio.enabled ? '🔊 SOUND ON' : '🔇 MUTED';
+        const soundLabel = document.getElementById('sound-icon');
+        soundLabel.innerHTML = game.audio.enabled 
+          ? '🔊<span class="btn-label-long"> SOUND ON</span>' 
+          : '🔇<span class="btn-label-long"> MUTED</span>';
       });
 
       // New Game & Restart
@@ -2063,9 +2189,6 @@
         document.getElementById('modal-gameover').classList.remove('active');
         game.initNewMatch();
       });
-
-      // Initial Start
-      game.initNewMatch();
     });
   </script>
 </body>
