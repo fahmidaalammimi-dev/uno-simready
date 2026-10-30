@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SimReady UNO | Next-Gen Tactical Card Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Rajdhani:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       NVIDIA SimReady Inspired Design System & Global Variables
+       ========================================================================== */
+    :root {
+      --bg-dark: #080b11;
+      --bg-surface: #0f1523;
+      --bg-surface-elevated: #162035;
+      --table-base: #111827;
+      --table-felt: #0c1524;
+      --table-border: #1f2d48;
+      
+      --color-red: #ff2a5f;
+      --color-red-glow: rgba(255, 42, 95, 0.45);
+      --color-blue: #00b4ff;
+      --color-blue-glow: rgba(0, 180, 255, 0.45);
+      --color-green: #00e676;
+      --color-green-glow: rgba(0, 230, 118, 0.45);
+      --color-yellow: #ffb703;
+      --color-yellow-glow: rgba(255, 183, 3, 0.45);
+      
+      --color-wild: #8a2be2;
+      --color-wild-glow: rgba(138, 43, 226, 0.5);
+
+      --accent-cyan: #00f0ff;
+      --accent-neon: #76ff03;
+      --text-main: #f0f4fc;
+      --text-muted: #8b9bb4;
+      --gold: #ffd166;
+      
+      --card-w: 86px;
+      --card-h: 126px;
+      --card-radius: 10px;
+      
+      --font-display: 'Rajdhani', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 30%, #152238 0%, transparent 70%),
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+      color: var(--text-main);
+      font-family: var(--font-display);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       Header HUD
+       ========================================================================== */
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 24px;
+      background: rgba(15, 21, 35, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      z-index: 100;
+      height: 60px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .logo-badge .nvidia-badge {
+      background: #76b900;
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+
+    .logo-badge span.uno-title {
+      background: linear-gradient(135deg, #ff2a5f, #ffb703, #00e676, #00b4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .hud-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      background: rgba(22, 32, 53, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+    }
+
+    .hud-pill .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-neon);
+      box-shadow: 0 0 8px var(--accent-neon);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-hud {
+      background: rgba(22, 32, 53, 0.9);
+      color: var(--text-main);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .btn-hud:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-hud:active {
+      transform: translateY(1px);
+    }
+
+    /* ==========================================================================
+       3D Game Viewport & Arena
+       ========================================================================== */
+    .viewport-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1200px;
+      perspective-origin: 50% 65%;
+      overflow: hidden;
+    }
+
+    .game-arena {
+      width: 1000px;
+      height: 680px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .game-arena.perspective-3d {
+      transform: rotateX(24deg) scale(0.96);
+    }
+
+    .game-arena.camera-shake {
+      animation: cameraShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes cameraShake {
+      10%, 90% { transform: rotateX(24deg) scale(0.96) translate3d(-2px, -3px, 0); }
+      20%, 80% { transform: rotateX(24deg) scale(0.96) translate3d(4px, 2px, 0); }
+      30%, 50%, 70% { transform: rotateX(24deg) scale(0.96) translate3d(-5px, -2px, 0); }
+      40%, 60% { transform: rotateX(24deg) scale(0.96) translate3d(5px, 3px, 0); }
+    }
+
+    /* Futuristic Arena Table */
+    .tactical-table {
+      position: absolute;
+      inset: 40px;
+      background: radial-gradient(circle at 50% 50%, #152033 0%, #0a0f1a 80%);
+      border-radius: 120px;
+      border: 3px solid var(--table-border);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        inset 0 0 80px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(0, 240, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tactical-table::before {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border-radius: 110px;
+      border: 1px dashed rgba(0, 240, 255, 0.2);
+      pointer-events: none;
+    }
+
+    /* Ambient Direction Orbit Ring */
+    .turn-orbit-ring {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+    }
+
+    .turn-orbit-ring.cw {
+      animation: orbitRotateCW 16s linear infinite;
+      border-color: rgba(0, 240, 255, 0.25);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.08);
+    }
+
+    .turn-orbit-ring.ccw {
+      animation: orbitRotateCCW 16s linear infinite;
+      border-color: rgba(255, 42, 95, 0.25);
+      box-shadow: 0 0 25px rgba(255, 42, 95, 0.08);
+    }
+
+    @keyframes orbitRotateCW {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes orbitRotateCCW {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    .orbit-arrow {
+      position: absolute;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--accent-cyan);
+      opacity: 0.6;
+    }
+    .orbit-arrow:nth-child(1) { top: -10px; transform: rotate(90deg); }
+    .orbit-arrow:nth-child(2) { right: -10px; transform: rotate(180deg); }
+    .orbit-arrow:nth-child(3) { bottom: -10px; transform: rotate(270deg); }
+    .orbit-arrow:nth-child(4) { left: -10px; transform: rotate(0deg); }
+
+    /* ==========================================================================
+       Table Center (Piles, Deck, Active Color Badge)
+       ========================================================================== */
+    .center-podium {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      z-index: 10;
+    }
+
+    /* Deck Pile */
+    .deck-pile {
+      width: var(--card-w);
+      height: var(--card-h);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .deck-pile:hover {
+      transform: translateY(-5px) scale(1.04);
+    }
+
+    .deck-pile:active {
+      transform: scale(0.98);
+    }
+
+    .deck-pile .card-mock {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--card-radius);
+      background: linear-gradient(145deg, #182236, #0e1422);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .deck-pile .card-mock:nth-child(1) { transform: translate(-4px, -4px); opacity: 0.4; }
+    .deck-pile .card-mock:nth-child(2) { transform: translate(-2px, -2px); opacity: 0.7; }
+    .deck-pile .card-mock:nth-child(3) { 
+      transform: translate(0, 0);
+      background: radial-gradient(circle at 50% 50%, #1c273e, #0c121d);
+      border: 2px solid rgba(0, 240, 255, 0.6);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+
+    .deck-count-badge {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      white-space: nowrap;
+      background: rgba(10, 15, 25, 0.9);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Discard Pile */
+    .discard-pile {
+      width: var(--card-w);
+      height: var(--card-h);
+      position: relative;
+    }
+
+    .active-color-ring {
+      position: absolute;
+      inset: -12px;
+      border-radius: 18px;
+      border: 2px solid transparent;
+      pointer-events: none;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 25px transparent;
+    }
+
+    .active-color-ring.color-red {
+      border-color: var(--color-red);
+      box-shadow: 0 0 25px var(--color-red-glow);
+    }
+    .active-color-ring.color-blue {
+      border-color: var(--color-blue);
+      box-shadow: 0 0 25px var(--color-blue-glow);
+    }
+    .active-color-ring.color-green {
+      border-color: var(--color-green);
+      box-shadow: 0 0 25px var(--color-green-glow);
+    }
+    .active-color-ring.color-yellow {
+      border-color: var(--color-yellow);
+      box-shadow: 0 0 25px var(--color-yellow-glow);
+    }
+
+    /* Action Banner (Skip, Reverse, +2, +4 notification) */
+    .action-announcer {
+      position: absolute;
+      top: 36%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 8px 30px;
+      border-radius: 12px;
+      background: rgba(10, 14, 24, 0.92);
+      backdrop-filter: blur(16px);
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 80;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+    }
+
+    .action-announcer.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* ==========================================================================
+       Card Anatomy & Rendering
+       ========================================================================== */
+    .sim-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      border-radius: var(--card-radius);
+      position: absolute;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .sim-card.playable {
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.6);
+      animation: cardPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes cardPulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .sim-card.playable:hover {
+      animation: none;
+      transform: translateY(calc(var(--base-y, 0px) - 26px)) rotate(var(--base-rot, 0deg)) scale(1.16) !important;
+      box-shadow: 0 16px 36px rgba(0, 240, 255, 0.85);
+      z-index: 60 !important;
+    }
+
+    @media (max-width: 1100px) {
+      .game-arena {
+        transform: scale(0.85);
+      }
+      .game-arena.perspective-3d {
+        transform: rotateX(24deg) scale(0.85);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .game-arena {
+        transform: scale(0.7);
+      }
+      .game-arena.perspective-3d {
+        transform: rotateX(20deg) scale(0.7);
+      }
+      .sim-header {
+        padding: 8px 12px;
+      }
+      .hud-stats {
+        display: none;
+      }
+    }
+
+    .sim-card.disabled {
+      cursor: not-allowed;
+      filter: brightness(0.65) saturate(0.8);
+    }
+
+    /* Card Skin Face */
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--card-radius);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 6px;
+      overflow: hidden;
+      backface-visibility: hidden;
+    }
+
+    .card-face::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Color Palettes */
+    .card-face.red {
+      background: linear-gradient(135deg, #e60039, #b30029);
+      border-color: rgba(255, 128, 160, 0.4);
+    }
+    .card-face.blue {
+      background: linear-gradient(135deg, #0099ff, #0066cc);
+      border-color: rgba(128, 212, 255, 0.4);
+    }
+    .card-face.green {
+      background: linear-gradient(135deg, #00cc66, #008f47);
+      border-color: rgba(128, 255, 191, 0.4);
+    }
+    .card-face.yellow {
+      background: linear-gradient(135deg, #f5a623, #c47c00);
+      border-color: rgba(255, 226, 153, 0.4);
+    }
+    .card-face.wild {
+      background: linear-gradient(135deg, #1a1e2d, #0d101a);
+      border: 2px solid #a855f7;
+    }
+
+    /* Card Back (Flipped) */
+    .card-back {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--card-radius);
+      background: radial-gradient(circle at 50% 50%, #202b40 0%, #0d121c 100%);
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+      backface-visibility: hidden;
+    }
+
+    .card-back .back-logo {
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.4);
+      transform: rotate(-30deg);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* Card Inner Geometry */
+    .card-corner {
+      font-size: 0.95rem;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .card-corner.bottom {
+      transform: rotate(180deg);
+      align-self: flex-end;
+    }
+
+    .card-center-art {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .center-value {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Special Iconography */
+    .wild-quad-ring {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--color-red) 0deg 90deg,
+        var(--color-blue) 90deg 180deg,
+        var(--color-yellow) 180deg 270deg,
+        var(--color-green) 270deg 360deg
+      );
+      box-shadow: 0 0 12px rgba(0,0,0,0.5);
+      border: 2px solid #fff;
+    }
+
+    /* ==========================================================================
+       Player Stations (Spatial Layout)
+       ========================================================================== */
+    .player-station {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      z-index: 20;
+    }
+
+    /* Station Status Pod */
+    .station-pod {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 16px;
+      background: rgba(15, 22, 36, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+    }
+
+    .player-station.active-turn .station-pod {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      background: rgba(0, 240, 255, 0.15);
+    }
+
+    .avatar-orb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1c263c;
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+
+    .station-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .station-card-badge {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .uno-speech-bubble {
+      position: absolute;
+      top: -30px;
+      background: var(--color-red);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      box-shadow: 0 0 15px var(--color-red);
+      animation: bounce 0.6s infinite alternate ease-in-out;
+      display: none;
+    }
+
+    .uno-speech-bubble.visible {
+      display: block;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-5px); }
+    }
+
+    /* Human Station (Bottom) */
+    .station-human {
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .human-hand-container {
+      width: 100%;
+      height: 140px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    /* AI North (Top) */
+    .station-north {
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .north-hand-mock {
+      display: flex;
+      gap: 3px;
+    }
+    .north-hand-mock .mini-card {
+      width: 24px;
+      height: 38px;
+      border-radius: 4px;
+      background: #182236;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    /* AI West (Left) */
+    .station-west {
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .west-hand-mock {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .west-hand-mock .mini-card {
+      width: 38px;
+      height: 24px;
+      border-radius: 4px;
+      background: #182236;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    /* AI East (Right) */
+    .station-east {
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .east-hand-mock {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .east-hand-mock .mini-card {
+      width: 38px;
+      height: 24px;
+      border-radius: 4px;
+      background: #182236;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    /* ==========================================================================
+       Action Pod: Pass Turn & UNO Call Buttons
+       ========================================================================== */
+    .player-action-pod {
+      position: absolute;
+      right: 30px;
+      bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 90;
+    }
+
+    .btn-uno {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ff4d6d, #b30029);
+      border: 3px solid #fff;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(255, 42, 95, 0.6);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      outline: none;
+    }
+
+    .btn-uno.glow-pulse {
+      animation: unoPulse 1s infinite alternate;
+    }
+
+    @keyframes unoPulse {
+      0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 42, 95, 0.5); }
+      100% { transform: scale(1.12); box-shadow: 0 0 40px rgba(255, 42, 95, 1); }
+    }
+
+    .btn-uno:active {
+      transform: scale(0.92);
+    }
+
+    .btn-pass {
+      background: rgba(22, 32, 53, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-pass.visible {
+      display: block;
+    }
+
+    .btn-pass:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #fff;
+    }
+
+    /* ==========================================================================
+       Modals: Color Picker & Game Over
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 14, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .picker-box {
+      background: rgba(16, 23, 37, 0.95);
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+      border-radius: 24px;
+      padding: 30px;
+      text-align: center;
+      max-width: 420px;
+      animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .picker-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .color-tile {
+      height: 90px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid rgba(255,255,255,0.2);
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      text-transform: uppercase;
+    }
+
+    .color-tile.tile-red { background: var(--color-red); }
+    .color-tile.tile-blue { background: var(--color-blue); }
+    .color-tile.tile-green { background: var(--color-green); }
+    .color-tile.tile-yellow { background: var(--color-yellow); color: #000; }
+
+    .color-tile:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Game Over Modal */
+    .gameover-box {
+      background: rgba(16, 23, 37, 0.95);
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 60px rgba(255, 209, 102, 0.3);
+      border-radius: 24px;
+      padding: 36px;
+      text-align: center;
+      max-width: 460px;
+      animation: modalPop 0.3s ease;
+    }
+
+    .winner-trophy {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 15px var(--gold));
+    }
+
+    .gameover-title {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .gameover-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 24px;
+    }
+
+    .btn-restart {
+      background: linear-gradient(135deg, var(--accent-cyan), #0099ff);
+      color: #05080e;
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      padding: 12px 36px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .btn-restart:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.8);
+    }
+
+    /* ==========================================================================
+       Ticker Log HUD (Left-Bottom)
+       ========================================================================== */
+    .ticker-hud {
+      position: absolute;
+      left: 20px;
+      bottom: 15px;
+      width: 280px;
+      height: 80px;
+      background: rgba(10, 15, 25, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .ticker-hud .log-entry {
+      line-height: 1.4;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .ticker-hud .log-entry.highlight {
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       Top HUD Header
+       ========================================================================== -->
+  <header class="sim-header">
+    <div class="brand-group">
+      <div class="logo-badge">
+        <span class="nvidia-badge">SIMREADY</span>
+        <span class="uno-title">UNO PROTOCOL</span>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-pill">
+          <div class="indicator-dot"></div>
+          <span id="match-turn-label">ROUND 1</span>
+        </div>
+        <div class="hud-pill">
+          <span style="color:var(--text-muted)">ACTIVE COLOR:</span>
+          <span id="active-color-name" style="font-weight:800; color:var(--accent-cyan)">INIT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-group">
+      <button class="btn-hud" id="btn-sort" title="Sort Hand by Color or Value">
+        <span>⇄ SORT HAND</span>
+      </button>
+      <button class="btn-hud" id="btn-camera" title="Toggle 3D Table Perspective">
+        <span>🎥 CAMERA: 3D</span>
+      </button>
+      <button class="btn-hud" id="btn-sound" title="Toggle Sound FX">
+        <span id="sound-icon">🔊 SOUND ON</span>
+      </button>
+      <button class="btn-hud" id="btn-new-game" title="Reset Match">
+        <span>↺ NEW MATCH</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       Interactive 3D Arena Viewport
+       ========================================================================== -->
+  <main class="viewport-container">
+    <div class="game-arena perspective-3d" id="game-arena">
+      <!-- Outer Tactical Table -->
+      <div class="tactical-table">
+        <!-- Direction Orbit Visualizer -->
+        <div class="turn-orbit-ring cw" id="orbit-ring">
+          <div class="orbit-arrow">▲</div>
+          <div class="orbit-arrow">▲</div>
+          <div class="orbit-arrow">▲</div>
+          <div class="orbit-arrow">▲</div>
+        </div>
+
+        <!-- Center Podium: Deck and Discard Pile -->
+        <div class="center-podium">
+          <!-- Draw Deck -->
+          <div class="deck-pile" id="draw-deck" title="Click to Draw a Card">
+            <div class="card-mock"></div>
+            <div class="card-mock"></div>
+            <div class="card-mock">
+              <div class="card-back">
+                <span class="back-logo">UNO</span>
+              </div>
+            </div>
+            <div class="deck-count-badge" id="deck-count-label">DECK: 108</div>
+          </div>
+
+          <!-- Discard Pile -->
+          <div class="discard-pile" id="discard-pile">
+            <div class="active-color-ring color-red" id="active-color-ring"></div>
+            <!-- Top Discard Card will be dynamically injected here -->
+          </div>
+        </div>
+
+        <!-- Event Action Announcer Banner -->
+        <div class="action-announcer" id="action-announcer">REVERSE</div>
+
+        <!-- Opponent Station 2: AI North -->
+        <div class="player-station station-north" id="station-2">
+          <div class="uno-speech-bubble" id="uno-bubble-2">UNO!</div>
+          <div class="station-pod">
+            <div class="avatar-orb">N2</div>
+            <div class="station-name">NEXUS-02</div>
+            <div class="station-card-badge" id="card-badge-2">7 CARDS</div>
+          </div>
+          <div class="north-hand-mock" id="north-hand-mock"></div>
+        </div>
+
+        <!-- Opponent Station 1: AI West -->
+        <div class="player-station station-west" id="station-1">
+          <div class="uno-speech-bubble" id="uno-bubble-1">UNO!</div>
+          <div class="station-pod">
+            <div class="avatar-orb">C1</div>
+            <div class="station-name">CYBER-01</div>
+            <div class="station-card-badge" id="card-badge-1">7 CARDS</div>
+          </div>
+          <div class="west-hand-mock" id="west-hand-mock"></div>
+        </div>
+
+        <!-- Opponent Station 3: AI East -->
+        <div class="player-station station-east" id="station-3">
+          <div class="uno-speech-bubble" id="uno-bubble-3">UNO!</div>
+          <div class="station-pod">
+            <div class="avatar-orb">V3</div>
+            <div class="station-name">VORTEX-03</div>
+            <div class="station-card-badge" id="card-badge-3">7 CARDS</div>
+          </div>
+          <div class="east-hand-mock" id="east-hand-mock"></div>
+        </div>
+
+        <!-- Human Station: Player 0 (Bottom) -->
+        <div class="player-station station-human active-turn" id="station-0">
+          <div class="uno-speech-bubble" id="uno-bubble-0">UNO!</div>
+          <div class="station-pod">
+            <div class="avatar-orb" style="color:var(--accent-neon); border-color:var(--accent-neon)">YOU</div>
+            <div class="station-name">OPERATOR</div>
+            <div class="station-card-badge" id="card-badge-0">7 CARDS</div>
+          </div>
+          <div class="human-hand-container" id="human-hand">
+            <!-- Dynamic Human Cards Rendered Here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Human Action Pod: UNO shout & Pass Turn -->
+    <div class="player-action-pod">
+      <button class="btn-uno" id="btn-uno" title="Call UNO before playing your 2nd to last card!">UNO!</button>
+      <button class="btn-pass" id="btn-pass">PASS TURN</button>
+    </div>
+
+    <!-- HUD Combat-Style Event Ticker -->
+    <div class="ticker-hud" id="ticker-hud">
+      <div class="log-entry highlight">System Initialized. SimReady table ready.</div>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       Modal: Wild Color Picker
+       ========================================================================== -->
+  <div class="modal-overlay" id="modal-color-picker">
+    <div class="picker-box">
+      <div class="picker-title">Select Color Directive</div>
+      <div class="color-grid">
+        <div class="color-tile tile-red" data-color="red">Red</div>
+        <div class="color-tile tile-blue" data-color="blue">Blue</div>
+        <div class="color-tile tile-green" data-color="green">Green</div>
+        <div class="color-tile tile-yellow" data-color="yellow">Yellow</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Modal: Game Over / Victory
+       ========================================================================== -->
+  <div class="modal-overlay" id="modal-gameover">
+    <div class="gameover-box">
+      <div class="winner-trophy" id="gameover-trophy">🏆</div>
+      <div class="gameover-title" id="gameover-title">MATCH COMPLETED</div>
+      <div class="gameover-desc" id="gameover-desc">Operator emerged triumphant.</div>
+      <button class="btn-restart" id="btn-modal-restart">PLAY NEXT ROUND</button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Card Game Architecture, Systems & Audio Synthesis
+       ========================================================================== -->
+  <script>
+    /**
+     * ==========================================================================
+     * 1. AUDIO SYNTHESIS SYSTEM (Web Audio API)
+     * Production-ready procedural sound effects. Zero external asset dependencies.
+     * ==========================================================================
+     */
+    class AudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playCardSnap() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, t);
+        osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
+
+        gain.gain.setValueAtTime(0.4, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.09);
+
+        // Click transient noise
+        this.playNoise(0.02, 0.15, 800);
+      }
+
+      playCardDraw() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.exponentialRampToValueAtTime(550, t + 0.12);
+
+        gain.gain.setValueAtTime(0.01, t);
+        gain.gain.linearRampToValueAtTime(0.18, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.13);
+      }
+
+      playSpecialAction() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, t);
+        osc.frequency.linearRampToValueAtTime(880, t + 0.25);
+
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.32);
+      }
+
+      playUnoAlert() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const t = this.ctx.currentTime;
+        [0, 0.15].forEach((delay, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(idx === 0 ? 587.33 : 880, t + delay);
+
+          gain.gain.setValueAtTime(0.2, t + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.14);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t + delay);
+          osc.stop(t + delay + 0.15);
+        });
+      }
+
+      playVictory() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const t = this.ctx.currentTime;
+
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, t + idx * 0.12);
+
+          gain.gain.setValueAtTime(0.3, t + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.12 + 0.35);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t + idx * 0.12);
+          osc.stop(t + idx * 0.12 + 0.36);
+        });
+      }
+
+      playDefeat() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const notes = [392.00, 311.13, 261.63]; // G4, Eb4, C4
+        const t = this.ctx.currentTime;
+
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, t + idx * 0.22);
+
+          gain.gain.setValueAtTime(0.25, t + idx * 0.22);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.22 + 0.4);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t + idx * 0.22);
+          osc.stop(t + idx * 0.22 + 0.42);
+        });
+      }
+
+      playNoise(duration, volume, filterFreq) {
+        if (!this.ctx) return;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(filterFreq, this.ctx.currentTime);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        noise.start();
+      }
+    }
+
+    /**
+     * ==========================================================================
+     * 2. GAME MODEL & CORE CARD MECHANICS (Card-Game Skill)
+     * Standard 108 Card Deck, Action Cards, Validation & Turn Scheduling
+     * ==========================================================================
+     */
+    const COLORS = ['red', 'blue', 'green', 'yellow'];
+    const CARD_TYPES = {
+      NUMBER: 'number',
+      SKIP: 'skip',
+      REVERSE: 'reverse',
+      DRAW2: 'draw2',
+      WILD: 'wild',
+      WILD4: 'wild4'
+    };
+
+    class UnoGame {
+      constructor() {
+        this.audio = new AudioEngine();
+        this.deck = [];
+        this.discardPile = [];
+        this.players = [
+          { id: 0, name: 'Operator', isAI: false, hand: [], unoDeclared: false },
+          { id: 1, name: 'Cyber-01', isAI: true, hand: [], unoDeclared: false },
+          { id: 2, name: 'Nexus-02', isAI: true, hand: [], unoDeclared: false },
+          { id: 3, name: 'Vortex-03', isAI: true, hand: [], unoDeclared: false }
+        ];
+        this.currentPlayerIdx = 0;
+        this.direction = 1; // 1: clockwise, -1: counter-clockwise
+        this.activeColor = 'red';
+        this.hasDrawnThisTurn = false;
+        this.isWaitingForColor = false;
+        this.pendingWildCard = null;
+        this.isProcessingAI = false;
+        this.sortBy = 'color'; // 'color' or 'value'
+        this.is3D = true;
+      }
+
+      initNewMatch() {
+        this.deck = this.generateDeck();
+        this.shuffleDeck(this.deck);
+        this.discardPile = [];
+        this.direction = 1;
+        this.currentPlayerIdx = 0;
+        this.hasDrawnThisTurn = false;
+        this.isWaitingForColor = false;
+        this.pendingWildCard = null;
+        this.isProcessingAI = false;
+
+        // Deal 7 cards to each player
+        this.players.forEach(p => {
+          p.hand = [];
+          p.unoDeclared = false;
+          for (let i = 0; i < 7; i++) {
+            p.hand.push(this.deck.pop());
+          }
+        });
+
+        // Seed discard pile with a standard number card
+        let initialCard = this.deck.pop();
+        while (initialCard.type !== CARD_TYPES.NUMBER) {
+          this.deck.unshift(initialCard);
+          this.shuffleDeck(this.deck);
+          initialCard = this.deck.pop();
+        }
+        this.discardPile.push(initialCard);
+        this.activeColor = initialCard.color;
+
+        this.log(`New Match Started. First card: ${initialCard.color.toUpperCase()} ${initialCard.value}`);
+        this.updateUI();
+
+        // Check if starting player is AI
+        if (this.players[this.currentPlayerIdx].isAI) {
+          this.scheduleAITurn();
+        }
+      }
+
+      generateDeck() {
+        const deck = [];
+        let cardId = 1;
+
+        COLORS.forEach(color => {
+          // One 0 per color
+          deck.push({ id: cardId++, color, type: CARD_TYPES.NUMBER, value: 0 });
+
+          // Two of each 1-9 per color
+          for (let val = 1; val <= 9; val++) {
+            deck.push({ id: cardId++, color, type: CARD_TYPES.NUMBER, value: val });
+            deck.push({ id: cardId++, color, type: CARD_TYPES.NUMBER, value: val });
+          }
+
+          // Two of each action per color
+          [CARD_TYPES.SKIP, CARD_TYPES.REVERSE, CARD_TYPES.DRAW2].forEach(actionType => {
+            const valLabel = actionType === CARD_TYPES.DRAW2 ? '+2' : actionType.toUpperCase();
+            deck.push({ id: cardId++, color, type: actionType, value: valLabel });
+            deck.push({ id: cardId++, color, type: actionType, value: valLabel });
+          });
+        });
+
+        // 4 Wilds and 4 Wild Draw Fours
+        for (let i = 0; i < 4; i++) {
+          deck.push({ id: cardId++, color: 'wild', type: CARD_TYPES.WILD, value: 'W' });
+          deck.push({ id: cardId++, color: 'wild', type: CARD_TYPES.WILD4, value: '+4' });
+        }
+
+        return deck;
+      }
+
+      shuffleDeck(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      getTopCard() {
+        return this.discardPile[this.discardPile.length - 1];
+      }
+
+      canPlayCard(card) {
+        const top = this.getTopCard();
+        if (card.color === 'wild') return true;
+        if (card.color === this.activeColor) return true;
+        if (card.type === CARD_TYPES.NUMBER && top.type === CARD_TYPES.NUMBER && card.value === top.value) return true;
+        if (card.type !== CARD_TYPES.NUMBER && card.type === top.type) return true;
+        return false;
+      }
+
+      drawCardFromDeck() {
+        if (this.deck.length === 0) {
+          if (this.discardPile.length > 1) {
+            const top = this.discardPile.pop();
+            this.deck = [...this.discardPile];
+            this.discardPile = [top];
+            this.shuffleDeck(this.deck);
+            this.log('Draw deck recycled and reshuffled.');
+          } else {
+            this.log('Deck is completely exhausted.');
+            return null;
+          }
+        }
+        return this.deck.pop();
+      }
+
+      drawCardsForPlayer(player, count) {
+        for (let i = 0; i < count; i++) {
+          const card = this.drawCardFromDeck();
+          if (card) {
+            player.hand.push(card);
+          }
+        }
+        player.unoDeclared = false;
+        this.audio.playCardDraw();
+      }
+
+      getNextPlayerIndex(step = 1) {
+        const total = this.players.length;
+        return (this.currentPlayerIdx + step * this.direction + total * 100) % total;
+      }
+
+      advanceTurn(skipSteps = 1) {
+        this.hasDrawnThisTurn = false;
+        this.currentPlayerIdx = this.getNextPlayerIndex(skipSteps);
+        this.updateUI();
+
+        // Check if current player is AI
+        if (this.players[this.currentPlayerIdx].isAI) {
+          this.scheduleAITurn();
+        }
+      }
+
+      playCard(player, cardIndex, chosenWildColor = null) {
+        const card = player.hand[cardIndex];
+        if (!card || !this.canPlayCard(card)) return false;
+
+        // Verify UNO Call compliance:
+        // If player has 2 cards and plays 1 without calling UNO, penalize with 2 cards!
+        if (player.hand.length === 2 && !player.unoDeclared) {
+          this.log(`⚠️ ${player.name} forgot to call UNO! Penalty +2 cards applied.`);
+          this.drawCardsForPlayer(player, 2);
+          this.triggerAnnouncement('UNO PENALTY!');
+        }
+
+        // Remove card from player hand
+        player.hand.splice(cardIndex, 1);
+        this.discardPile.push(card);
+        this.audio.playCardSnap();
+
+        // Check win condition
+        if (player.hand.length === 0) {
+          this.handleGameOver(player);
+          return true;
+        }
+
+        // Handle UNO shout trigger if exactly 1 card remains
+        if (player.hand.length === 1) {
+          this.audio.playUnoAlert();
+          this.showUnoBubble(player.id);
+          this.triggerAnnouncement(`${player.name} CALLED UNO!`);
+          this.log(`🚨 ${player.name} has only ONE card left! UNO!`);
+        }
+
+        // Resolve Card Mechanics
+        if (card.color === 'wild') {
+          this.activeColor = chosenWildColor || 'red';
+          this.audio.playSpecialAction();
+          this.triggerCameraShake();
+
+          if (card.type === CARD_TYPES.WILD4) {
+            const nextP = this.players[this.getNextPlayerIndex()];
+            this.log(`${player.name} played WILD +4! Chosen Color: ${this.activeColor.toUpperCase()}`);
+            this.triggerAnnouncement('+4 DRAW FOUR!');
+            this.drawCardsForPlayer(nextP, 4);
+            this.advanceTurn(2); // Skips the victim
+            return true;
+          } else {
+            this.log(`${player.name} played WILD! Color chosen: ${this.activeColor.toUpperCase()}`);
+            this.triggerAnnouncement(`WILD: ${this.activeColor.toUpperCase()}`);
+            this.advanceTurn(1);
+            return true;
+          }
+        } else {
+          this.activeColor = card.color;
+
+          if (card.type === CARD_TYPES.SKIP) {
+            const skippedPlayer = this.players[this.getNextPlayerIndex()];
+            this.audio.playSpecialAction();
+            this.triggerAnnouncement(`SKIPPED: ${skippedPlayer.name}`);
+            this.log(`${player.name} played SKIP! ${skippedPlayer.name}'s turn was skipped.`);
+            this.advanceTurn(2);
+            return true;
+          } else if (card.type === CARD_TYPES.REVERSE) {
+            this.direction *= -1;
+            this.audio.playSpecialAction();
+            this.triggerAnnouncement('REVERSE!');
+            this.log(`${player.name} played REVERSE! Turn order inverted.`);
+            this.advanceTurn(1);
+            return true;
+          } else if (card.type === CARD_TYPES.DRAW2) {
+            const victim = this.players[this.getNextPlayerIndex()];
+            this.audio.playSpecialAction();
+            this.triggerAnnouncement(`+2 DRAW TWO!`);
+            this.log(`${player.name} played +2 on ${victim.name}!`);
+            this.drawCardsForPlayer(victim, 2);
+            this.advanceTurn(2);
+            return true;
+          } else {
+            // Standard number card
+            this.log(`${player.name} played ${card.color.toUpperCase()} ${card.value}`);
+            this.advanceTurn(1);
+            return true;
+          }
+        }
+      }
+
+      handleGameOver(winner) {
+        this.updateUI();
+        const modal = document.getElementById('modal-gameover');
+        const title = document.getElementById('gameover-title');
+        const desc = document.getElementById('gameover-desc');
+        const trophy = document.getElementById('gameover-trophy');
+
+        if (winner.id === 0) {
+          this.audio.playVictory();
+          trophy.textContent = '🏆';
+          title.textContent = 'TACTICAL VICTORY';
+          desc.textContent = 'You have outplayed all adversary systems!';
+        } else {
+          this.audio.playDefeat();
+          trophy.textContent = '💀';
+          title.textContent = 'SIMULATION FAILED';
+          desc.textContent = `${winner.name} emptied their hand and claimed the round.`;
+        }
+        modal.classList.add('active');
+        this.log(`🏁 MATCH ENDED. WINNER: ${winner.name.toUpperCase()}`);
+      }
+
+      /**
+       * AI Opponent Decision Engine
+       */
+      scheduleAITurn() {
+        if (this.isProcessingAI) return;
+        this.isProcessingAI = true;
+
+        const aiPlayer = this.players[this.currentPlayerIdx];
+        const delay = 900 + Math.random() * 400;
+
+        setTimeout(() => {
+          if (this.currentPlayerIdx !== aiPlayer.id) {
+            this.isProcessingAI = false;
+            return;
+          }
+
+          // Evaluate playable cards
+          const playableIndices = [];
+          aiPlayer.hand.forEach((card, idx) => {
+            if (this.canPlayCard(card)) {
+              playableIndices.push(idx);
+            }
+          });
+
+          // Simulate AI calling UNO when down to 2 cards
+          if (aiPlayer.hand.length === 2 && Math.random() < 0.95) {
+            aiPlayer.unoDeclared = true;
+            this.showUnoBubble(aiPlayer.id);
+            this.audio.playUnoAlert();
+          }
+
+          if (playableIndices.length > 0) {
+            // Strategic AI Card Selection:
+            // Prefer action cards (+4, +2, Skip, Reverse), then number cards
+            playableIndices.sort((a, b) => {
+              const cardA = aiPlayer.hand[a];
+              const cardB = aiPlayer.hand[b];
+              const scoreA = cardA.type === CARD_TYPES.WILD4 ? 10 : cardA.type === CARD_TYPES.DRAW2 ? 8 : cardA.type === CARD_TYPES.SKIP ? 6 : 1;
+              const scoreB = cardB.type === CARD_TYPES.WILD4 ? 10 : cardB.type === CARD_TYPES.DRAW2 ? 8 : cardB.type === CARD_TYPES.SKIP ? 6 : 1;
+              return scoreB - scoreA;
+            });
+
+            const chosenIndex = playableIndices[0];
+            const chosenCard = aiPlayer.hand[chosenIndex];
+
+            // AI Color selection for Wilds: choose majority color in hand
+            let chosenColor = 'red';
+            if (chosenCard.color === 'wild') {
+              const colorCounts = { red: 0, blue: 0, green: 0, yellow: 0 };
+              aiPlayer.hand.forEach(c => {
+                if (c.color !== 'wild') colorCounts[c.color]++;
+              });
+              let maxCount = -1;
+              Object.keys(colorCounts).forEach(col => {
+                if (colorCounts[col] > maxCount) {
+                  maxCount = colorCounts[col];
+                  chosenColor = col;
+                }
+              });
+            }
+
+            this.playCard(aiPlayer, chosenIndex, chosenColor);
+          } else {
+            // Draw a card
+            this.log(`${aiPlayer.name} has no valid play and drew a card.`);
+            const drawn = this.drawCardFromDeck();
+            if (drawn) {
+              aiPlayer.hand.push(drawn);
+              this.audio.playCardDraw();
+              // If drawn card is playable, AI immediately plays it
+              if (this.canPlayCard(drawn)) {
+                const newIdx = aiPlayer.hand.length - 1;
+                let colorForWild = 'blue';
+                if (drawn.color === 'wild') colorForWild = COLORS[Math.floor(Math.random() * 4)];
+                setTimeout(() => {
+                  this.playCard(aiPlayer, newIdx, colorForWild);
+                  this.isProcessingAI = false;
+                }, 500);
+                return;
+              }
+            }
+            this.advanceTurn(1);
+          }
+
+          this.isProcessingAI = false;
+        }, delay);
+      }
+
+      /**
+       * ==========================================================================
+       * 3. UI RENDERING & SPATIAL FEEDBACK (Level & Camera Design Skills)
+       * ==========================================================================
+       */
+      updateUI() {
+        // Update Discard Top Card
+        const topCard = this.getTopCard();
+        const discardContainer = document.getElementById('discard-pile');
+        const colorRing = document.getElementById('active-color-ring');
+
+        // Color ring update
+        colorRing.className = `active-color-ring color-${this.activeColor}`;
+        document.getElementById('active-color-name').textContent = this.activeColor.toUpperCase();
+        document.getElementById('active-color-name').style.color = `var(--color-${this.activeColor})`;
+
+        // Re-render top discard card
+        const existingCard = discardContainer.querySelector('.sim-card');
+        if (existingCard) existingCard.remove();
+
+        const topCardElem = this.createCardElement(topCard, false);
+        // Add random slight rotational jitter for photorealistic tactile look
+        const jitter = (topCard.id * 17) % 18 - 9;
+        topCardElem.style.transform = `rotate(${jitter}deg)`;
+        discardContainer.appendChild(topCardElem);
+
+        // Update Deck Count
+        document.getElementById('deck-count-label').textContent = `DECK: ${this.deck.length}`;
+
+        // Update Direction Orbit Ring
+        const ring = document.getElementById('orbit-ring');
+        ring.className = `turn-orbit-ring ${this.direction === 1 ? 'cw' : 'ccw'}`;
+
+        // Update Stations active-turn class & card counts
+        this.players.forEach(p => {
+          const station = document.getElementById(`station-${p.id}`);
+          const badge = document.getElementById(`card-badge-${p.id}`);
+          if (station) {
+            station.classList.toggle('active-turn', this.currentPlayerIdx === p.id);
+          }
+          if (badge) {
+            badge.textContent = `${p.hand.length} CARD${p.hand.length !== 1 ? 'S' : ''}`;
+          }
+        });
+
+        // Update AI Hand Mocks (visual card backs)
+        this.renderAIMockHand('north-hand-mock', this.players[2].hand.length, false);
+        this.renderAIMockHand('west-hand-mock', this.players[1].hand.length, true);
+        this.renderAIMockHand('east-hand-mock', this.players[3].hand.length, true);
+
+        // Update Human Hand
+        this.renderHumanHand();
+
+        // Pass button visibility: only if human's turn AND has drawn a card
+        const btnPass = document.getElementById('btn-pass');
+        const isHumanTurn = this.currentPlayerIdx === 0;
+        btnPass.classList.toggle('visible', isHumanTurn && this.hasDrawnThisTurn);
+
+        // UNO Button highlight
+        const btnUno = document.getElementById('btn-uno');
+        const humanCards = this.players[0].hand.length;
+        btnUno.classList.toggle('glow-pulse', humanCards === 2 && !this.players[0].unoDeclared);
+      }
+
+      renderAIMockHand(elementId, count, isVertical) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+        const displayCount = Math.min(count, 14);
+        for (let i = 0; i < displayCount; i++) {
+          const div = document.createElement('div');
+          div.className = 'mini-card';
+          container.appendChild(div);
+        }
+      }
+
+      renderHumanHand() {
+        const container = document.getElementById('human-hand');
+        container.innerHTML = '';
+
+        const human = this.players[0];
+        const isMyTurn = this.currentPlayerIdx === 0;
+
+        // Sorting
+        const cardsWithIndices = human.hand.map((card, idx) => ({ card, originalIdx: idx }));
+        if (this.sortBy === 'color') {
+          const order = { red: 1, blue: 2, green: 3, yellow: 4, wild: 5 };
+          cardsWithIndices.sort((a, b) => (order[a.card.color] || 9) - (order[b.card.color] || 9) || a.card.value.toString().localeCompare(b.card.value.toString()));
+        } else {
+          cardsWithIndices.sort((a, b) => a.card.value.toString().localeCompare(b.card.value.toString()));
+        }
+
+        const total = cardsWithIndices.length;
+        const maxSpread = Math.min(680, total * 65);
+        const step = total > 1 ? maxSpread / (total - 1) : 0;
+        const startLeft = -maxSpread / 2;
+
+        cardsWithIndices.forEach((item, i) => {
+          const { card, originalIdx } = item;
+          const playable = isMyTurn && this.canPlayCard(card);
+          const cardElem = this.createCardElement(card, true);
+
+          if (playable) {
+            cardElem.classList.add('playable');
+          } else if (isMyTurn) {
+            cardElem.classList.add('disabled');
+          }
+
+          // Fan positioning calculations
+          const xPos = total === 1 ? 0 : startLeft + i * step;
+          const rot = total > 1 ? ((i - (total - 1) / 2) / ((total - 1) / 2 || 1)) * 14 : 0;
+          const yOffset = Math.abs(rot) * 1.6;
+
+          cardElem.style.left = `calc(50% - ${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-w')) / 2}px + ${xPos}px)`;
+          cardElem.style.setProperty('--base-rot', `${rot}deg`);
+          cardElem.style.setProperty('--base-y', `${yOffset}px`);
+          cardElem.style.transform = `translateY(${yOffset}px) rotate(${rot}deg)`;
+          cardElem.style.zIndex = i + 10;
+
+          // Click handler to play
+          cardElem.addEventListener('click', () => {
+            if (!isMyTurn) {
+              this.log('Wait for your turn, Operator.');
+              return;
+            }
+            if (!playable) {
+              this.log('Invalid card play. Must match color, value, or be Wild.');
+              return;
+            }
+
+            if (card.color === 'wild') {
+              this.openColorPicker(originalIdx);
+            } else {
+              this.playCard(human, originalIdx);
+            }
+          });
+
+          container.appendChild(cardElem);
+        });
+      }
+
+      createCardElement(card, interactive = false) {
+        const cardElem = document.createElement('div');
+        cardElem.className = 'sim-card';
+
+        const face = document.createElement('div');
+        face.className = `card-face ${card.color}`;
+
+        // Value text or symbol
+        let displayVal = card.value;
+        if (card.type === CARD_TYPES.SKIP) displayVal = '⊘';
+        if (card.type === CARD_TYPES.REVERSE) displayVal = '⇄';
+        if (card.type === CARD_TYPES.WILD) displayVal = 'W';
+        if (card.type === CARD_TYPES.WILD4) displayVal = '+4';
+
+        // Top-left corner
+        const cornerTop = document.createElement('div');
+        cornerTop.className = 'card-corner';
+        cornerTop.textContent = displayVal;
+
+        // Center Art
+        const centerArt = document.createElement('div');
+        centerArt.className = 'card-center-art';
+
+        if (card.color === 'wild') {
+          const quadRing = document.createElement('div');
+          quadRing.className = 'wild-quad-ring';
+          centerArt.appendChild(quadRing);
+
+          if (card.type === CARD_TYPES.WILD4) {
+            const plus4 = document.createElement('div');
+            plus4.style.position = 'absolute';
+            plus4.style.fontWeight = '900';
+            plus4.style.fontSize = '1.3rem';
+            plus4.style.color = '#fff';
+            plus4.style.textShadow = '0 0 8px rgba(0,0,0,0.8)';
+            plus4.textContent = '+4';
+            centerArt.appendChild(plus4);
+          }
+        } else {
+          const centerText = document.createElement('div');
+          centerText.className = 'center-value';
+          centerText.textContent = displayVal;
+          centerArt.appendChild(centerText);
+        }
+
+        // Bottom-right corner
+        const cornerBottom = document.createElement('div');
+        cornerBottom.className = 'card-corner bottom';
+        cornerBottom.textContent = displayVal;
+
+        face.appendChild(cornerTop);
+        face.appendChild(centerArt);
+        face.appendChild(cornerBottom);
+        cardElem.appendChild(face);
+
+        return cardElem;
+      }
+
+      openColorPicker(cardIdx) {
+        this.pendingWildCard = cardIdx;
+        const modal = document.getElementById('modal-color-picker');
+        modal.classList.add('active');
+      }
+
+      selectWildColor(color) {
+        const modal = document.getElementById('modal-color-picker');
+        modal.classList.remove('active');
+        if (this.pendingWildCard !== null) {
+          const idx = this.pendingWildCard;
+          this.pendingWildCard = null;
+          this.playCard(this.players[0], idx, color);
+        }
+      }
+
+      triggerAnnouncement(text) {
+        const banner = document.getElementById('action-announcer');
+        banner.textContent = text;
+        banner.classList.add('active');
+        setTimeout(() => {
+          banner.classList.remove('active');
+        }, 1200);
+      }
+
+      triggerCameraShake() {
+        const arena = document.getElementById('game-arena');
+        arena.classList.add('camera-shake');
+        setTimeout(() => {
+          arena.classList.remove('camera-shake');
+        }, 460);
+      }
+
+      showUnoBubble(playerId) {
+        const bubble = document.getElementById(`uno-bubble-${playerId}`);
+        if (bubble) {
+          bubble.classList.add('visible');
+          setTimeout(() => {
+            bubble.classList.remove('visible');
+          }, 2400);
+        }
+      }
+
+      log(msg) {
+        const hud = document.getElementById('ticker-hud');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const time = new Date().toLocaleTimeString().split(' ')[0];
+        entry.innerHTML = `<span style="color:#00f0ff">[${time}]</span> ${msg}`;
+        hud.appendChild(entry);
+        while (hud.children.length > 4) {
+          hud.removeChild(hud.firstChild);
+        }
+      }
+    }
+
+    /**
+     * ==========================================================================
+     * 4. BOOTSTRAPPER & EVENT WIRING
+     * ==========================================================================
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      const game = new UnoGame();
+      window.gameInstance = game;
+
+      // Draw Deck Click
+      document.getElementById('draw-deck').addEventListener('click', () => {
+        if (game.currentPlayerIdx !== 0) {
+          game.log('Hold tactical patience. It is not your turn.');
+          return;
+        }
+        if (game.hasDrawnThisTurn) {
+          game.log('You have already drawn a card this turn. Play a valid card or Pass.');
+          return;
+        }
+
+        const drawn = game.drawCardFromDeck();
+        if (drawn) {
+          game.players[0].hand.push(drawn);
+          game.hasDrawnThisTurn = true;
+          game.audio.playCardDraw();
+          game.log(`Operator drew ${drawn.color.toUpperCase()} ${drawn.value}`);
+          game.updateUI();
+        }
+      });
+
+      // Pass Button Click
+      document.getElementById('btn-pass').addEventListener('click', () => {
+        if (game.currentPlayerIdx === 0 && game.hasDrawnThisTurn) {
+          game.log('Operator passed their turn.');
+          game.advanceTurn(1);
+        }
+      });
+
+      // UNO Shout Button Click
+      document.getElementById('btn-uno').addEventListener('click', () => {
+        const human = game.players[0];
+        human.unoDeclared = true;
+        game.audio.playUnoAlert();
+        game.showUnoBubble(0);
+        game.triggerAnnouncement('OPERATOR CALLED UNO!');
+        game.log('🚨 Operator declared UNO status!');
+        game.updateUI();
+      });
+
+      // Color Picker Options
+      document.querySelectorAll('.color-tile').forEach(tile => {
+        tile.addEventListener('click', (e) => {
+          const color = e.currentTarget.getAttribute('data-color');
+          game.selectWildColor(color);
+        });
+      });
+
+      // Sort Hand Button
+      document.getElementById('btn-sort').addEventListener('click', () => {
+        game.sortBy = game.sortBy === 'color' ? 'value' : 'color';
+        document.getElementById('btn-sort').innerHTML = `<span>⇄ SORT: ${game.sortBy.toUpperCase()}</span>`;
+        game.renderHumanHand();
+      });
+
+      // Camera Perspective Toggle
+      document.getElementById('btn-camera').addEventListener('click', () => {
+        game.is3D = !game.is3D;
+        const arena = document.getElementById('game-arena');
+        arena.classList.toggle('perspective-3d', game.is3D);
+        document.getElementById('btn-camera').innerHTML = `<span>🎥 CAMERA: ${game.is3D ? '3D' : '2D TOP'}</span>`;
+      });
+
+      // Sound Toggle
+      document.getElementById('btn-sound').addEventListener('click', () => {
+        game.audio.enabled = !game.audio.enabled;
+        document.getElementById('sound-icon').textContent = game.audio.enabled ? '🔊 SOUND ON' : '🔇 MUTED';
+      });
+
+      // New Game & Restart
+      document.getElementById('btn-new-game').addEventListener('click', () => {
+        game.initNewMatch();
+      });
+      document.getElementById('btn-modal-restart').addEventListener('click', () => {
+        document.getElementById('modal-gameover').classList.remove('active');
+        game.initNewMatch();
+      });
+
+      // Initial Start
+      game.initNewMatch();
+    });
+  </script>
+</body>
+</html>
